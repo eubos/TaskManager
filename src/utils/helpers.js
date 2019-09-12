@@ -19,5 +19,9 @@ export const applyDrag = (arr, dragResult) => {
   }
 
   export const convertUnixTimestampToTime = (duration) => {
-    return new Moment.unix(duration).format('DD.MM.YYYY HH:mm')
+    return new Moment.unix(duration).format('DD.MM.YYYY HH:mm:ss')
+}
+
+  export const convertTimeToUnixTimestamp = (duration) => {
+    return new Date(duration).getTime() / 1000
 }

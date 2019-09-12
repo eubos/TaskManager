@@ -6,12 +6,13 @@
                 alignment="center"
                 justify="center">
                     <v-col cols="12" sm="7" class="mb-1">
-                       <v-btn text :to="'/'"><v-icon>mdi-arrow-left</v-icon> Back</v-btn>
-                            <h1 class="font-weight-light">Create new task</h1> 
+                       <v-btn text :to="'/task/' + id"><v-icon>mdi-arrow-left</v-icon> Back</v-btn>
+                            <h1 class="font-weight-light">Edit task</h1> 
                             <v-card class="mx-auto">
                             <v-card-text>
                             <v-text-field
                                 v-model="title"
+                                value= title
                                 label="Title"
                                 :error-messages="titleErrors"
                                 required
@@ -20,7 +21,7 @@
                             <v-row>
                                 <v-col lg="6">
                                     <h3>Priority</h3>
-                                    <v-radio-group
+                                    <v-radio-group 
                                     v-model="priority" 
                                     row 
                                     :error-messages="priorityErrors"
@@ -56,7 +57,8 @@
                                     req
                                     :error-messages="dateTimeErrors"
                                     required
-                                    @blur="$v.dateTime.$touch()">
+                                    @blur="$v.dateTime.$touch()"
+                                    >
                                     </date-picker>
                                 </v-col>
                             </v-row>
@@ -73,11 +75,14 @@
 
 <script>
 import DatePicker from 'vue2-datepicker'
+import { convertUnixTimestampToTime, convertTimeToUnixTimestamp } from "../utils/helpers"
 import { validationMixin } from 'vuelidate'
 import { required, minLength } from 'vuelidate/lib/validators'
-import { $post } from '../utils/requests'
-import { convertTimeToUnixTimestamp } from '../utils/helpers'
+import { $put, $get } from '../utils/requests'
+import Moment from 'moment'
+
 export default {
+    props: ['id'],
     components: { DatePicker },
     data(){
         return{
@@ -87,13 +92,37 @@ export default {
             response: ''
         }
     },
-    validations: {
+     validations: {
       title: { required, minLength: minLength(3) },
       priority: { required },
       dateTime: { required }
     },
+    computed :{
+      getToken (){
+        return this.$store.getters.getToken
+        },
+      titleErrors () {
+        const errors = []
+        if (!this.$v.title.$dirty) return errors
+        !this.$v.title.minLength && errors.push('Title must be at most 3 characters long')
+        !this.$v.title.required && errors.push('Title is required')
+        return errors
+        },
+      priorityErrors () {
+        const errors = []
+        if (!this.$v.priority.$dirty) return errors
+        !this.$v.priority.required && errors.push('Priority is required')
+        return errors
+        },
+      dateTimeErrors () {
+        const errors = []
+        if (!this.$v.dateTime.$dirty) return errors
+        !this.$v.dateTime.required && errors.push('Date is required')
+        return errors
+        }
+    },
     methods: {
-        submit(){
+      submit(){
         this.$v.$touch();
         if (this.$v.$invalid) {
         this.response = 'All fields are required'
@@ -107,10 +136,10 @@ export default {
             "dueBy": convertTimeToUnixTimestamp(this.dateTime),
             "priority": this.priority
         }
-        $post('http://testapi.doitserver.in.ua/api/tasks', header, body)
+        $put('http://testapi.doitserver.in.ua/api/tasks/' + this.id, header, body)
         .then((res) => {
             if (res.status >= 200 && res.status < 300) {
-                this.response = 'Task created';
+                this.response = 'Task updated';
                 return res;
             } 
             else if (res.status === 422) {
@@ -134,7 +163,7 @@ export default {
         })
         .then(() => {
             setTimeout(() => {
-                this.$router.push('/')
+                this.$router.push('/task/' + this.id)
             }, 2000)
         })
         .catch((e) => {
@@ -142,31 +171,19 @@ export default {
             console.log(e.response);
         });
       }
-    }
-    },
-    computed: {
-      getToken (){
-        return this.$store.getters.getToken
-        },
-      titleErrors () {
-        const errors = []
-        if (!this.$v.title.$dirty) return errors
-        !this.$v.title.minLength && errors.push('Title must be at most 3 characters long')
-        !this.$v.title.required && errors.push('Title is required')
-        return errors
-        },
-      priorityErrors () {
-        const errors = []
-        if (!this.$v.priority.$dirty) return errors
-        !this.$v.priority.required && errors.push('Priority is required')
-        return errors
-        },
-      dateTimeErrors () {
-        const errors = []
-        if (!this.$v.dateTime.$dirty) return errors
-        !this.$v.dateTime.required && errors.push('Date is required')
-        return errors
         }
+    },
+    mounted(){
+      const header = {
+            'Authorization': 'Bearer ' + this.getToken
+            }
+            $get('http://testapi.doitserver.in.ua/api/tasks/' + this.id, header).then(response => {
+                let resp = JSON.parse(response);
+                this.title = resp.task.title;
+                this.priority = resp.task.priority;
+                this.dateTime = new Moment.unix(resp.task.dueBy).format();
+            })
+            .catch(e => console.log(e))
     }
 }
 </script>

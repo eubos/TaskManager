@@ -1,12 +1,12 @@
 <template>
- <div>
- <v-container  fluid>
+<div>
+<v-container  fluid>
     <v-row alignment="center" justify="center">
         <v-col cols="12" sm="8" class="mb-1">
             <Container @drop="onDrop">            
                 <Draggable v-for="task in $store.state.tasks" :key="task.id">
                         <v-card class="mx-auto ma-1">
-                              <v-row class="pl-2 pr-2">
+                              <v-row class="pl-2 pr-2" align="center">
                                 <v-col lg="4">
                                     Title
                                     <p class="headline font-weight-light"> 
@@ -34,54 +34,24 @@
                                 text
                                 color="primary"
                                 :to="'/task/' + task.id"
+                                class="mt-3"
                                 >Open</v-btn>
                                     </p>
                                 </v-col>
-                                
                               </v-row>
-                        <!-- <v-card
-                        >
-                            <v-row>
-                            <v-card-text>
-                            <div>{{getDate(task)}}</div>
-                            <div>{{task.priority}}</div>
-                            
-                            </v-card-text>
-                            <v-card-actions>
-                                <v-btn
-                                text
-                                color="primary"
-                                :to="'/task/' + task.id"
-                                >Open</v-btn>
-                            </v-card-actions>
-                            </v-row> -->
                         </v-card>
-                        
-                    </Draggable>
-                </Container>
-</v-col>
-                </v-row>
-
-
-                    <!-- <v-col cols="12" sm="10" class="mb-1">
-                        <v-card class="mx-auto">
-                              <v-row>
-                                <v-col lg="4">
-                                
-                                </v-col>
-                              </v-row>
-                            </v-card>
-                    </v-col>
-                </v-row> -->
-            </v-container>
-  </div>
+                </Draggable>
+            </Container>
+        </v-col>
+    </v-row>
+</v-container>
+</div>
 </template>
 
 <script>
-import { Container, Draggable } from "vue-smooth-dnd";
-import { applyDrag, convertUnixTimestampToTime } from "../utils/helpers";
-import Task from './Task';
-import store from '../store';
+import { Container, Draggable } from "vue-smooth-dnd"
+import { applyDrag, convertUnixTimestampToTime } from "../utils/helpers"
+import { $get, $post } from '../utils/requests'
 
 export default {
     data(){
@@ -96,19 +66,35 @@ export default {
     components: {
             Container,
             Draggable,
-            Task
     },
 
     methods: {
+        init(){
+            const header = {
+            'Authorization': 'Bearer ' + this.getToken
+            }
+            $get('http://testapi.doitserver.in.ua/api/tasks?page=1&sort=title%20asc', header).then(response => {
+                let resp = JSON.parse(response);
+                this.$store.dispatch('setTasks', resp.tasks);
+                this.$store.dispatch('setMeta', resp.meta);
+            })
+            .catch(e => console.log(e))
+
+        },
         onDrop(dropResult) {
-            store.state.tasks = applyDrag(store.state.tasks, dropResult);
+            this.$store.state.tasks = applyDrag(this.$store.state.tasks, dropResult)
         },
         getDate(task){
             return convertUnixTimestampToTime(task.dueBy)
         }
+    },
+    computed: {
+      getToken (){
+        return this.$store.getters.getToken
+      }
+    },
+    created(){
+        this.init()
     }
 }
 </script>
-<style scoped>
-
-</style>

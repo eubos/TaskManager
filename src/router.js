@@ -4,6 +4,8 @@ import Task from './components/Task'
 import TaskList from './components/TaskList'
 import CreateNewTask from './components/CreateNewTask'
 import Login from './components/Login'
+import EditTask from './components/EditTask'
+import Registration from './components/Registration'
 import AuthGuard from './auth-guard'
 
 Vue.use(Router)
@@ -15,12 +17,19 @@ export default new Router({
       path: '/task/:id',
       props: true,
       name: 'task',
-      component: Task
+      component: Task,
+      beforeEnter: AuthGuard
     },
     {
       path: '/',
       name: 'taskList',
-      component: TaskList
+      component: TaskList,
+      beforeEnter: AuthGuard
+    },
+    {
+      path: '/registration',
+      name: 'registration',
+      component: Registration
     },
     {
       path: '/login',
@@ -30,7 +39,15 @@ export default new Router({
     {
       path: '/createNewTask',
       name: 'createNewTask',
-      component: CreateNewTask
+      component: CreateNewTask,
+      beforeEnter: AuthGuard
+    },
+    {
+      path: '/editTask/:id',
+      props: true,
+      name: 'editTask',
+      component: EditTask,
+      beforeEnter: AuthGuard
     }
   ]
 })
