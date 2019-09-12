@@ -1,25 +1,36 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import Task from './components/Task'
+import TaskList from './components/TaskList'
+import CreateNewTask from './components/CreateNewTask'
+import Login from './components/Login'
+import AuthGuard from './auth-guard'
 
 Vue.use(Router)
 
 export default new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
   routes: [
     {
-      path: '/',
-      name: 'home',
-      component: Home
+      path: '/task/:id',
+      props: true,
+      name: 'task',
+      component: Task
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+      path: '/',
+      name: 'taskList',
+      component: TaskList
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/createNewTask',
+      name: 'createNewTask',
+      component: CreateNewTask
     }
   ]
 })
