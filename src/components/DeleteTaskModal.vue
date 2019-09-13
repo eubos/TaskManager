@@ -1,26 +1,18 @@
 <template>
-    <v-dialog xs12 sm6 offset-sm3 v-model="modal">
+    <v-dialog v-model="modal" style="width:40%">
         <template v-slot:activator="{ on }">
             <v-btn text icon v-on="on" color="red"><v-icon>mdi-delete</v-icon></v-btn>
-        </template>  
-        <v-card>
+        </template>
+        <v-card class="justify-center">
             <v-container v-if="!response">
-                <v-layout row>
-                    <v-flex xs12>
                         <v-card-title>
                                 Do you want to delete the task?
                         </v-card-title>
-                    </v-flex>
-                </v-layout>
-                 <v-layout row>
-                    <v-flex xs12>
                         <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn @click="onCancel">No</v-btn>
                             <v-btn class="primary" @click="deleteTask">Yes</v-btn>
                         </v-card-actions>
-                    </v-flex>
-                </v-layout>
             </v-container>
             <v-container v-else>
                 <v-layout row>

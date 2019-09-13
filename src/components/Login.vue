@@ -81,19 +81,22 @@ export default {
                 return res;
             } 
             else if (res.status === 422) {
-                this.response = 'Something went wrong. Check your Email or Password';
+                this.response = 'Error. Check your Email or Password';
+                this.$store.dispatch('setLoading', false);
                 let error = new Error(res.statusText);
                 error.response = res;
                 throw error;
             }
             else if (res.status === 403) {
-                this.response = 'Something went wrong. Check your Email or Password';
+                this.response = 'Error Check your Email or Password';
+                this.$store.dispatch('setLoading', false);
                 let error = new Error(res.statusText);
                 error.response = res;
                 throw error;
             }
             else {
                 let error = new Error(res.statusText);
+                this.$store.dispatch('setLoading', false);
                 this.response = 'Something went wrong. Check console';
                 error.response = res;
                 throw error;
@@ -117,6 +120,8 @@ export default {
         .catch((e) => {
             console.log('Error: ' + e.message);
             console.log(e.response);
+            this.response = 'Error: ' + e.message;
+            this.$store.dispatch('setLoading', false);
         });
       }
     },    

@@ -94,7 +94,8 @@ export default {
     },
     created(){
       this.$store.dispatch('setLoading', true);
-      const header = {
+      if (this.task) {
+        const header = {
             'Authorization': 'Bearer ' + this.getToken
             }
             $get('http://testapi.doitserver.in.ua/api/tasks/' + this.id, header).then(response => {
@@ -104,7 +105,15 @@ export default {
                 this.dateTime = resp.task.dueBy;
                 this.$store.dispatch('setLoading', false);
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+              this.$store.dispatch('setLoading', false);
+              console.log(e);
+              })
+      } else {
+        this.$store.dispatch('setLoading', false);
+        this.$router.push('/')
+      }
+      
     },
     mounted(){
        this.$store.dispatch('setLoading', false);

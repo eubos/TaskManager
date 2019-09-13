@@ -12,7 +12,9 @@ export default new Vuex.Store({
     user: '',
     tasks: '',
     meta: '',
-    loading: false
+    loading: false,
+    sortBy: 'title',
+    sortOrder: 'asc',
   },
   mutations: {
     setAuthToken (state, payload){
@@ -32,6 +34,12 @@ export default new Vuex.Store({
     },
     setLoading (state, payload) {
       state.loading = payload
+    },
+    setSortBy (state, payload) {
+      state.sortBy = payload
+    },
+    setSortOrder (state, payload) {
+      state.sortOrder = payload
     }
   },
   actions: {
@@ -52,6 +60,12 @@ export default new Vuex.Store({
     },
     setLoading ({commit}, payload) {
       commit('setLoading', payload)
+    },
+    setSortBy ({commit}, payload) {
+      commit('setSortBy', payload)
+    },
+    setSortOrder ({commit}, payload) {
+      commit('setSortOrder', payload)
     }
   },
   getters: {
@@ -78,6 +92,12 @@ export default new Vuex.Store({
     },
     loading(state){
       return state.loading
+    },
+    getSortBy(state){
+      return state.sortBy
+    },
+    getSortOrder(state){
+      return state.sortOrder
     }
   }
 })

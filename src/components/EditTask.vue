@@ -63,7 +63,7 @@
                                 </v-col>
                             </v-row>
                             <v-btn class="mr-4 primary" @click="submit">save</v-btn>
-                            {{response}}
+                            <strong class="red--text text--lighten-1">{{response}}</strong>
                             </v-card-text>
                         </v-card>
                     </v-col>
@@ -154,18 +154,21 @@ export default {
                 return res;
             } 
             else if (res.status === 422) {
+                this.$store.dispatch('setLoading', false);
                 this.response = 'Something went wrong';
                 let error = new Error(res.statusText);
                 error.response = res;
                 throw error;
             }
             else if (res.status === 403) {
+                this.$store.dispatch('setLoading', false);
                 this.response = 'Something went wrong';
                 let error = new Error(res.statusText);
                 error.response = res;
                 throw error;
             }
             else {
+                this.$store.dispatch('setLoading', false);
                 this.response = 'Something went wrong';
                 let error = new Error(res.statusText);
                 error.response = res;
@@ -181,6 +184,8 @@ export default {
         .catch((e) => {
             console.log('Error: ' + e.message);
             console.log(e.response);
+            this.response = 'Error: ' + e.message;
+            this.$store.dispatch('setLoading', false);
         });
       }
         }

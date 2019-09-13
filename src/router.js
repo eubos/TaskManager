@@ -6,6 +6,7 @@ import CreateNewTask from './components/CreateNewTask'
 import Login from './components/Login'
 import EditTask from './components/EditTask'
 import Registration from './components/Registration'
+import Settings from './components/Settings'
 import AuthGuard from './auth-guard'
 
 Vue.use(Router)
@@ -24,6 +25,12 @@ export default new Router({
       path: '/',
       name: 'taskList',
       component: TaskList,
+      beforeEnter: AuthGuard
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: Settings,
       beforeEnter: AuthGuard
     },
     {

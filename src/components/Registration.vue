@@ -94,18 +94,21 @@ export default {
                 return res;
             } 
             else if (res.status === 422) {
+                this.$store.dispatch('setLoading', false);
                 this.response = 'The email has already been taken';
                 let error = new Error(res.statusText);
                 error.response = res;
                 throw error;
             }
             else if (res.status === 403) {
+                this.$store.dispatch('setLoading', false);
                 this.response = 'Something went wrong. Check your Email or Password';
                 let error = new Error(res.statusText);
                 error.response = res;
                 throw error;
             }
             else {
+                this.$store.dispatch('setLoading', false);
                 let error = new Error(res.statusText);
                 this.response = 'Something went wrong. Check console';
                 error.response = res;
@@ -128,6 +131,8 @@ export default {
         .catch((e) => {
             console.log('Error: ' + e.message);
             console.log(e.response);
+            this.response = 'Error: ' + e.message;
+            this.$store.dispatch('setLoading', false);
         });
       }
       },    
@@ -155,7 +160,7 @@ export default {
       },
         loading () {
         return this.$store.getters.loading
-        }
+      }
      },
      beforeCreate(){
        this.$store.dispatch('setLoading', true);

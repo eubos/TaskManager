@@ -2,16 +2,16 @@
 <div>
 <v-container v-if="!loading && $store.state.tasks.length" fluid>
     <v-row alignment="center" justify="center">
-        <v-col cols="12" sm="8">
+        <v-col cols="12" sm="6">
              <v-row class="pl-2 pr-2" align="center">
                                 <v-col class="sort caption" lg="4" @click="sort('title')">
-                                    <v-icon>mdi-arrow-up-down</v-icon> Sort by title 
+                                    <v-icon>mdi-arrow-up-down</v-icon> Title 
                                 </v-col>
                                 <v-col class="sort caption" lg="3" @click="sort('priority')">
-                                    <v-icon>mdi-arrow-up-down</v-icon> Sort by priority
+                                    <v-icon>mdi-arrow-up-down</v-icon> Priority
                                 </v-col>
                                 <v-col class="sort caption" lg="3" @click="sort('dueBy')">
-                                    <v-icon>mdi-arrow-up-down</v-icon> Sort by date
+                                    <v-icon>mdi-arrow-up-down</v-icon> Date
                                 </v-col>
             </v-row>
             <Container @drop="onDrop">            
@@ -19,13 +19,11 @@
                         <v-card class="mx-auto ma-1">
                               <v-row class="pl-2 pr-2" align="center">
                                 <v-col lg="4">
-                                    Title
                                     <p class="headline font-weight-light"> 
                                     {{task.title}}
                                     </p>
                                 </v-col>
                                 <v-col lg="3">
-                                    Priority
                                     <p class="headline font-weight-light">
                                         <v-icon v-if="task.priority == 'High'" color="red">mdi-arrow-top-left-thick</v-icon>
                                         <v-icon v-if="task.priority == 'Normal'" color="yellow">mdi-arrow-top-left-thick</v-icon>
@@ -34,7 +32,6 @@
                                     </p>
                                 </v-col>
                                 <v-col lg="3">
-                                    Date
                                     <p class="headline font-weight-light">
                                     {{getDate(task)}}
                                     </p>
@@ -45,7 +42,6 @@
                                 text
                                 color="primary"
                                 :to="'/task/' + task.id"
-                                class="mt-3"
                                 >Open</v-btn>
                                     </p>
                                 </v-col>
@@ -88,8 +84,6 @@ import { $get, $post } from '../utils/requests'
 export default {
     data(){
         return{
-            sortBy: 'title',
-            sortOrder: 'asc',
             currentPage: 1,
             totalPages: 1
         }
@@ -105,7 +99,7 @@ export default {
             const header = {
             'Authorization': 'Bearer ' + this.getToken
             }
-            $get(`http://testapi.doitserver.in.ua/api/tasks?page=${this.currentPage}&sort=${this.sortBy}%20${this.sortOrder}`, header).then(response => {
+            $get(`http://testapi.doitserver.in.ua/api/tasks?page=${this.currentPage}&sort=${this.getSortBy}%20${this.getSortOrder}`, header).then(response => {
                 let resp = JSON.parse(response);
                 this.$store.dispatch('setTasks', resp.tasks);
                 this.$store.dispatch('setMeta', resp.meta)
@@ -115,8 +109,10 @@ export default {
                     this.$store.dispatch('setLoading', false);
                 })
             })
-            .catch(e => console.log(e))
-
+            .catch(e => {
+              this.$store.dispatch('setLoading', false);
+              console.log(e);
+              })
         },
         onDrop(dropResult) {
             this.$store.state.tasks = applyDrag(this.$store.state.tasks, dropResult)
@@ -125,8 +121,8 @@ export default {
             return convertUnixTimestampToTime(task.dueBy)
         },
         sort(sortBy){
-            this.sortBy = sortBy;
-            this.sortOrder === 'asc' ? this.sortOrder = 'desc' : this.sortOrder = 'asc';
+            this.$store.dispatch('setSortBy', sortBy);
+            this.getSortOrder === 'asc' ? this.$store.dispatch('setSortOrder', 'desc') : this.$store.dispatch('setSortOrder', 'asc')
             this.init();
         },
         changePage(){
@@ -139,6 +135,12 @@ export default {
       },
       loading () {
         return this.$store.getters.loading
+      },
+      getSortBy(){
+        return this.$store.getters.getSortBy
+      },
+      getSortOrder(){
+        return this.$store.getters.getSortOrder
       }
     },
     created(){
