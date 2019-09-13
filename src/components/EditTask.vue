@@ -1,12 +1,12 @@
 <template>
    <div>
         <v-form>
-            <v-container fluid>
+            <v-container v-if="!loading" fluid>
+            <v-btn text :to="'/task/' + id"><v-icon>mdi-arrow-left</v-icon> Back</v-btn>
                 <v-row
                 alignment="center"
                 justify="center">
                     <v-col cols="12" sm="7" class="mb-1">
-                       <v-btn text :to="'/task/' + id"><v-icon>mdi-arrow-left</v-icon> Back</v-btn>
                             <h1 class="font-weight-light">Edit task</h1> 
                             <v-card class="mx-auto">
                             <v-card-text>
@@ -69,6 +69,13 @@
                     </v-col>
                 </v-row>
             </v-container>
+            <v-container v-else>
+                <v-layout row>
+                    <v-flex xs12 class="text-xs-center pt-5">
+                    <v-progress-linear :indeterminate="true"></v-progress-linear>
+                    </v-flex>
+                </v-layout>
+            </v-container>
         </v-form>
     </div>
 </template>
@@ -119,6 +126,9 @@ export default {
         if (!this.$v.dateTime.$dirty) return errors
         !this.$v.dateTime.required && errors.push('Date is required')
         return errors
+        },
+        loading () {
+        return this.$store.getters.loading
         }
     },
     methods: {
@@ -127,6 +137,7 @@ export default {
         if (this.$v.$invalid) {
         this.response = 'All fields are required'
         } else {
+       this.$store.dispatch('setLoading', true);
         const header = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + this.getToken
@@ -163,6 +174,7 @@ export default {
         })
         .then(() => {
             setTimeout(() => {
+                this.$store.dispatch('setLoading', false);
                 this.$router.push('/task/' + this.id)
             }, 2000)
         })
@@ -173,8 +185,12 @@ export default {
       }
         }
     },
+     beforeCreate(){
+       this.$store.dispatch('setLoading', true);
+    },
     mounted(){
-      const header = {
+        this.$store.dispatch('setLoading', false);
+        const header = {
             'Authorization': 'Bearer ' + this.getToken
             }
             $get('http://testapi.doitserver.in.ua/api/tasks/' + this.id, header).then(response => {

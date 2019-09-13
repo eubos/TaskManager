@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-form>
-            <v-container  fluid>
+            <v-container v-if="!loading" fluid>
                 <v-row
                 alignment="center"
                 justify="center">
@@ -14,6 +14,7 @@
                                 label="E-mail"
                                 required
                                 @blur="$v.email.$touch()"
+                                @keydown.enter="submit"
                             ></v-text-field>
                             <v-text-field
                                 v-model="password"
@@ -22,6 +23,7 @@
                                 type="Password"
                                 required
                                 @blur="$v.password.$touch()"
+                                @keydown.enter="submit"
                             ></v-text-field>
                             <v-btn class="mr-4 primary" @click="submit">login</v-btn>
                             <v-btn text :to="'/registration'">registration</v-btn>
@@ -30,6 +32,13 @@
                         </v-card>
                     </v-col>
                 </v-row>
+            </v-container>
+            <v-container v-else>
+                <v-layout row>
+                    <v-flex xs12 class="text-xs-center pt-5">
+                    <v-progress-linear :indeterminate="true"></v-progress-linear>
+                    </v-flex>
+                </v-layout>
             </v-container>
         </v-form>
     </div>
@@ -58,6 +67,7 @@ export default {
         if (this.$v.$invalid) {
         this.response = 'All fields are required'
         } else {
+       this.$store.dispatch('setLoading', true);
        const header = {
             'Content-Type': 'application/json'
             }
@@ -96,6 +106,7 @@ export default {
                 this.$store.dispatch('setLogin', true);
                 this.$store.dispatch('setUser', this.email)
                 .then(() => {
+                this.$store.dispatch('setLoading', false);
                 this.$router.push('/')
                 })
                 .catch(() => {});
@@ -124,7 +135,16 @@ export default {
         !this.$v.password.minLength && errors.push('Password must be at most 6 characters long')
         !this.$v.password.required && errors.push('Password is required.')
         return errors
-      },
+        },
+        loading () {
+        return this.$store.getters.loading
+        }
+     },
+     beforeCreate(){
+       this.$store.dispatch('setLoading', true);
+     },
+     mounted(){
+       this.$store.dispatch('setLoading', false);
      }
 }
 </script>

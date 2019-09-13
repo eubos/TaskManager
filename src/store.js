@@ -1,26 +1,22 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import shared from './shared'
 import createPersistedState from 'vuex-persistedstate';
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   plugins: [createPersistedState()],
-  modules: {
-    shared
-  },
   state: {
     authToken: '',
     isLogged: false,
     user: '',
     tasks: '',
-    meta: ''
+    meta: '',
+    loading: false
   },
   mutations: {
     setAuthToken (state, payload){
       state.authToken = payload;
-      console.log('state.authToken', state.authToken);
     },
     setLogin (state, payload){
       state.isLogged = payload;
@@ -33,6 +29,9 @@ export default new Vuex.Store({
     },
     setMeta (state, payload){
       state.meta = payload;
+    },
+    setLoading (state, payload) {
+      state.loading = payload
     }
   },
   actions: {
@@ -50,6 +49,9 @@ export default new Vuex.Store({
     },
     setMeta({commit}, payload){
       commit('setMeta', payload);
+    },
+    setLoading ({commit}, payload) {
+      commit('setLoading', payload)
     }
   },
   getters: {
@@ -73,6 +75,9 @@ export default new Vuex.Store({
     },
     getUser(state){
       return state.user
+    },
+    loading(state){
+      return state.loading
     }
   }
 })

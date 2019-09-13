@@ -6,7 +6,7 @@
       >
       <v-btn text :to="'/'">TASK<span class="font-weight-light">MANAGER</span></v-btn>
       </v-toolbar-title>
-      <span class="pl-5" v-if="getUser"><span class="font-weight-light">Hello </span>{{getUser}}</span>
+      <span class="pl-5" id="helloUser" v-if="getUser"><span class="font-weight-light">Hello </span>{{getUser}}</span>
       <v-spacer></v-spacer>
       <v-btn v-if="isLogged" :to="'/createNewTask'" color="primary">Add Task</v-btn>
        <router-link to="/" tag="span" class="pointer">
@@ -31,7 +31,6 @@ export default {
     TaskList,
     CreateNewTask
   },
-
   methods :{
             
         logOut(){
@@ -54,3 +53,15 @@ export default {
   }
 };
 </script>
+<style scoped>
+@media screen and (max-width: 600px) {
+    #helloUser {
+      display: inline;
+    }
+}
+@media screen and (max-width: 992px) {
+    #helloUser {
+      display: none;
+    }
+}
+</style>

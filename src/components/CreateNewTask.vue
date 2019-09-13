@@ -1,12 +1,12 @@
 <template>
    <div>
         <v-form>
-            <v-container fluid>
+            <v-container v-if="!loading" fluid>
+                <v-btn text :to="'/'"><v-icon>mdi-arrow-left</v-icon> Back</v-btn>
                 <v-row
                 alignment="center"
                 justify="center">
                     <v-col cols="12" sm="7" class="mb-1">
-                       <v-btn text :to="'/'"><v-icon>mdi-arrow-left</v-icon> Back</v-btn>
                             <h1 class="font-weight-light">Create new task</h1> 
                             <v-card class="mx-auto">
                             <v-card-text>
@@ -67,6 +67,20 @@
                     </v-col>
                 </v-row>
             </v-container>
+            <v-container v-else>
+                <v-layout row>
+                    <v-flex xs12 class="text-xs-center pt-5">
+                        <v-row
+                        alignment="center"
+                        justify="center">
+                            <v-col cols="12" sm="2" class="mb-1">
+                            <h1 class="font-weight-light">{{response}}</h1> 
+                            </v-col>
+                        </v-row>
+                    <v-progress-linear :indeterminate="true"></v-progress-linear>
+                    </v-flex>
+                </v-layout>
+            </v-container>
         </v-form>
     </div>
 </template>
@@ -98,6 +112,7 @@ export default {
         if (this.$v.$invalid) {
         this.response = 'All fields are required'
         } else {
+       this.$store.dispatch('setLoading', true);
         const header = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + this.getToken
@@ -134,7 +149,8 @@ export default {
         })
         .then(() => {
             setTimeout(() => {
-                this.$router.push('/')
+                this.$store.dispatch('setLoading', false);
+                this.$router.push('/');
             }, 2000)
         })
         .catch((e) => {
@@ -166,7 +182,16 @@ export default {
         if (!this.$v.dateTime.$dirty) return errors
         !this.$v.dateTime.required && errors.push('Date is required')
         return errors
+        },
+        loading () {
+        return this.$store.getters.loading
         }
+    },
+    beforeCreate(){
+       this.$store.dispatch('setLoading', true);
+    },
+     mounted(){
+       this.$store.dispatch('setLoading', false);
     }
 }
 </script>

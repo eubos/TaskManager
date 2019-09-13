@@ -1,8 +1,19 @@
 <template>
 <div>
-<v-container  fluid>
+<v-container v-if="!loading && $store.state.tasks.length" fluid>
     <v-row alignment="center" justify="center">
-        <v-col cols="12" sm="8" class="mb-1">
+        <v-col cols="12" sm="8">
+             <v-row class="pl-2 pr-2" align="center">
+                                <v-col class="sort caption" lg="4" @click="sort('title')">
+                                    <v-icon>mdi-arrow-up-down</v-icon> Sort by title 
+                                </v-col>
+                                <v-col class="sort caption" lg="3" @click="sort('priority')">
+                                    <v-icon>mdi-arrow-up-down</v-icon> Sort by priority
+                                </v-col>
+                                <v-col class="sort caption" lg="3" @click="sort('dueBy')">
+                                    <v-icon>mdi-arrow-up-down</v-icon> Sort by date
+                                </v-col>
+            </v-row>
             <Container @drop="onDrop">            
                 <Draggable v-for="task in $store.state.tasks" :key="task.id">
                         <v-card class="mx-auto ma-1">
@@ -44,6 +55,27 @@
             </Container>
         </v-col>
     </v-row>
+    <div class="text-center">
+    <v-pagination v-if="totalPages > 1"
+      v-model="currentPage"
+      :length="totalPages"
+      @input="changePage"
+    ></v-pagination>
+    </div>
+</v-container>
+<v-container v-else-if="!loading && !$store.state.tasks.length" fluid>
+     <v-row alignment="center" justify="center" align="center">
+        <v-col cols="12" sm="7" class="display-3">
+            You don't have any tasks yet...
+        </v-col>
+     </v-row>
+</v-container>
+<v-container v-else>
+      <v-layout row>
+        <v-flex xs12 class="text-xs-center pt-5">
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
+        </v-flex>
+      </v-layout>
 </v-container>
 </div>
 </template>
@@ -56,11 +88,10 @@ import { $get, $post } from '../utils/requests'
 export default {
     data(){
         return{
-            cardsColors:{
-                High: "Red",
-                Normal: "Yellow",
-                Low: "Green"
-            }
+            sortBy: 'title',
+            sortOrder: 'asc',
+            currentPage: 1,
+            totalPages: 1
         }
     },
     components: {
@@ -70,13 +101,19 @@ export default {
 
     methods: {
         init(){
+            this.$store.dispatch('setLoading', true);
             const header = {
             'Authorization': 'Bearer ' + this.getToken
             }
-            $get('http://testapi.doitserver.in.ua/api/tasks?page=1&sort=title%20asc', header).then(response => {
+            $get(`http://testapi.doitserver.in.ua/api/tasks?page=${this.currentPage}&sort=${this.sortBy}%20${this.sortOrder}`, header).then(response => {
                 let resp = JSON.parse(response);
                 this.$store.dispatch('setTasks', resp.tasks);
-                this.$store.dispatch('setMeta', resp.meta);
+                this.$store.dispatch('setMeta', resp.meta)
+                .then(()=>{
+                    let totalPages = Math.ceil(resp.meta.count / resp.meta.limit);
+                    this.totalPages = +totalPages;
+                    this.$store.dispatch('setLoading', false);
+                })
             })
             .catch(e => console.log(e))
 
@@ -86,11 +123,22 @@ export default {
         },
         getDate(task){
             return convertUnixTimestampToTime(task.dueBy)
+        },
+        sort(sortBy){
+            this.sortBy = sortBy;
+            this.sortOrder === 'asc' ? this.sortOrder = 'desc' : this.sortOrder = 'asc';
+            this.init();
+        },
+        changePage(){
+            this.init();
         }
     },
     computed: {
       getToken (){
         return this.$store.getters.getToken
+      },
+      loading () {
+        return this.$store.getters.loading
       }
     },
     created(){
@@ -98,3 +146,8 @@ export default {
     }
 }
 </script>
+<style scoped>
+.sort{
+    cursor: pointer;
+}
+</style>

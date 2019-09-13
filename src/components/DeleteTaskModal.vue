@@ -1,5 +1,5 @@
 <template>
-    <v-dialog xs12 sm6 offset-sm3 width="40%" v-model="modal">
+    <v-dialog xs12 sm6 offset-sm3 v-model="modal">
         <template v-slot:activator="{ on }">
             <v-btn text icon v-on="on" color="red"><v-icon>mdi-delete</v-icon></v-btn>
         </template>  

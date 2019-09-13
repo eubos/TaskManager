@@ -1,11 +1,11 @@
 <template>
     <div>
-       <v-container  fluid>
+       <v-container v-if="!loading" fluid>
+            <v-btn text :to="'/'"><v-icon>mdi-arrow-left</v-icon> Back</v-btn>
                 <v-row
                 alignment="center"
                 justify="center">
                     <v-col cols="12" sm="10" class="mb-1">
-                       <v-btn text :to="'/'"><v-icon>mdi-arrow-left</v-icon> Back</v-btn>
                         <h1 class="font-weight-light">Task details</h1> 
                             <v-card class="mx-auto">
                               <v-row>
@@ -45,6 +45,13 @@
                     </v-col>
               </v-row>
         </v-container>
+        <v-container v-else>
+                <v-layout row>
+                    <v-flex xs12 class="text-xs-center pt-5">
+                    <v-progress-linear :indeterminate="true"></v-progress-linear>
+                    </v-flex>
+                </v-layout>
+            </v-container>
     </div>
 </template>
 
@@ -75,6 +82,9 @@ export default {
       },
       getToken (){
         return this.$store.getters.getToken
+      },
+      loading () {
+        return this.$store.getters.loading
       }
     },
     methods:{
@@ -83,6 +93,7 @@ export default {
         }
     },
     created(){
+      this.$store.dispatch('setLoading', true);
       const header = {
             'Authorization': 'Bearer ' + this.getToken
             }
@@ -91,8 +102,12 @@ export default {
                 this.title = resp.task.title;
                 this.priority = resp.task.priority;
                 this.dateTime = resp.task.dueBy;
+                this.$store.dispatch('setLoading', false);
             })
             .catch(e => console.log(e))
+    },
+    mounted(){
+       this.$store.dispatch('setLoading', false);
     }
 }
 </script>
